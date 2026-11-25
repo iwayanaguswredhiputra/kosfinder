@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/kos_provider.dart';
 import '../widgets/kos_card.dart';
+import 'kos_detail_screen.dart';
 
 class KosListScreen extends StatefulWidget {
   const KosListScreen({super.key});
@@ -113,7 +114,12 @@ class _KosListScreenState extends State<KosListScreen> {
                 return KosCard(
                   kos: kos,
                   onTap: () {
-                    // Navigasi ke detail kos (akan diimplementasikan pada T05)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => KosDetailScreen(kos: kos),
+                      ),
+                    );
                   },
                 );
               },
