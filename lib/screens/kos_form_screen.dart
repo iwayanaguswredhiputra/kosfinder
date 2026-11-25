@@ -9,8 +9,9 @@ import '../widgets/filter_modal.dart';
 
 class KosFormScreen extends StatefulWidget {
   final AuthProvider authProvider;
+  final KosModel? kos;
 
-  const KosFormScreen({super.key, required this.authProvider});
+  const KosFormScreen({super.key, required this.authProvider, this.kos});
 
   @override
   State<KosFormScreen> createState() => _KosFormScreenState();
@@ -28,6 +29,22 @@ class _KosFormScreenState extends State<KosFormScreen> {
   String? _selectedType;
   String? _errorMessage;
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final kos = widget.kos;
+    if (kos == null) return;
+
+    _nameController.text = kos.name;
+    _areaController.text = kos.area;
+    _priceController.text = kos.price.toString();
+    _roomsController.text = kos.roomsAvailable.toString();
+    _contactNameController.text = kos.contactName;
+    _contactPhoneController.text = kos.contactPhone;
+    _selectedType = kos.type;
+    _selectedFacilities.addAll(kos.facilities);
+  }
 
   @override
   void dispose() {
@@ -76,7 +93,7 @@ class _KosFormScreenState extends State<KosFormScreen> {
     });
 
     final kos = KosModel(
-      id: '',
+      id: widget.kos?.id ?? '',
       ownerId: ownerId,
       name: _nameController.text.trim(),
       area: _areaController.text.trim(),
@@ -89,7 +106,11 @@ class _KosFormScreenState extends State<KosFormScreen> {
     );
 
     try {
-      await context.read<KosProvider>().addKos(kos);
+      if (widget.kos == null) {
+        await context.read<KosProvider>().addKos(kos);
+      } else {
+        await context.read<KosProvider>().updateKos(kos);
+      }
       if (mounted) Navigator.of(context).pop(true);
     } catch (error) {
       if (mounted) {
@@ -104,7 +125,9 @@ class _KosFormScreenState extends State<KosFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tambah Kos')),
+      appBar: AppBar(
+        title: Text(widget.kos == null ? 'Tambah Kos' : 'Ubah Kos'),
+      ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -237,7 +260,13 @@ class _KosFormScreenState extends State<KosFormScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.save),
-                  label: Text(_isSaving ? 'Menyimpan...' : 'Simpan'),
+                  label: Text(
+                    _isSaving
+                        ? (widget.kos == null
+                              ? 'Menyimpan...'
+                              : 'Memperbarui...')
+                        : (widget.kos == null ? 'Simpan' : 'Perbarui'),
+                  ),
                 ),
               ],
             ),

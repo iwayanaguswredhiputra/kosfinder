@@ -119,6 +119,55 @@ void main() {
     expect(find.byKey(const Key('ownerKosList')), findsOneWidget);
   });
 
+  testWidgets('canceling delete keeps the listing and confirming removes it', (
+    tester,
+  ) async {
+    await authProvider.signIn(email: 'owner@example.com', password: 'secret1');
+    String? deletedId;
+    final ownerKosProvider = KosProvider(
+      repository: KosRepository(
+        customFetcher: () async => [
+          _kosMap('mine', 'owner-current', 'Kos Saya'),
+        ],
+        customDeleter: (id) async {
+          deletedId = id;
+        },
+      ),
+    );
+    addTearDown(ownerKosProvider.dispose);
+
+    await tester.pumpWidget(_dashboardApp(authProvider, ownerKosProvider));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('deleteKos_mine')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hapus listing?'), findsOneWidget);
+    expect(
+      find.text('Listing "Kos Saya" akan dihapus permanen.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('cancelDeleteKosButton')));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('ownerKosList')),
+        matching: find.text('Kos Saya'),
+      ),
+      findsOneWidget,
+    );
+    expect(deletedId, isNull);
+
+    await tester.tap(find.byKey(const Key('deleteKos_mine')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('confirmDeleteKosButton')));
+    await tester.pumpAndSettle();
+
+    expect(deletedId, 'mine');
+    expect(find.byKey(const Key('ownerKosList')), findsNothing);
+    expect(find.text('Kos Saya'), findsOneWidget);
+    expect(find.text('Anda belum memiliki listing kos'), findsOneWidget);
+  });
+
   testWidgets('logout signs out and returns to the home screen', (
     tester,
   ) async {

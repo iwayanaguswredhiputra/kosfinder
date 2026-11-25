@@ -50,7 +50,7 @@ Setiap slice menghasilkan aplikasi yang dapat dijalankan (*runnable*).
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | T14 | Implementasi method tambah, ubah, dan hapus kos pada KosRepository & KosProvider | US05-AC1, US06-AC1, US06-AC2, US06-AC3 | `lib/repositories/kos_repository.dart`, `lib/providers/kos_provider.dart` | `flutter test test/repositories/kos_crud_test.dart` & `flutter analyze` | Selesai |
 | T15 | Implementasi KosFormScreen untuk tambah listing kos baru dengan validasi dan checklist fasilitas | US05-AC1, US05-AC2 | `lib/screens/kos_form_screen.dart`, `lib/screens/owner_dashboard_screen.dart` | `flutter test test/screens/kos_form_screen_test.dart test/screens/owner_dashboard_screen_test.dart`, `flutter analyze`, `flutter test` | Selesai |
-| T16 | Implementasi mode edit pada KosFormScreen dan dialog konfirmasi hapus di OwnerDashboardScreen | US06-AC1, US06-AC2 | `lib/screens/owner_dashboard_screen.dart`, `lib/screens/kos_form_screen.dart` | `flutter run`, edit data kos dan hapus kos lalu periksa perubahan data secara realtime | Pending |
+| T16 | Implementasi mode edit pada KosFormScreen dan dialog konfirmasi hapus di OwnerDashboardScreen | US06-AC1, US06-AC2 | `lib/screens/owner_dashboard_screen.dart`, `lib/screens/kos_form_screen.dart` | `flutter test test/screens/kos_form_screen_test.dart test/screens/owner_dashboard_screen_test.dart`, `flutter analyze`, `flutter test` | Selesai |
 
 ---
 

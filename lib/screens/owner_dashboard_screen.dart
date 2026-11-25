@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/kos_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/kos_provider.dart';
 import '../widgets/kos_card.dart';
@@ -33,12 +34,45 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
-  Future<void> _openKosForm(BuildContext context) async {
+  Future<void> _openKosForm(BuildContext context, {KosModel? kos}) async {
     await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
-        builder: (_) => KosFormScreen(authProvider: widget.authProvider),
+        builder: (_) =>
+            KosFormScreen(authProvider: widget.authProvider, kos: kos),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, KosModel kos) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Hapus listing?'),
+        content: Text('Listing "${kos.name}" akan dihapus permanen.'),
+        actions: [
+          TextButton(
+            key: const Key('cancelDeleteKosButton'),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            key: const Key('confirmDeleteKosButton'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+    if (shouldDelete != true) return;
+
+    try {
+      await _kosProvider.deleteKos(kos.id);
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menghapus listing: $error')),
+      );
+    }
   }
 
   @override
@@ -135,7 +169,55 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
           return ListView.builder(
             key: const Key('ownerKosList'),
             itemCount: ownerKos.length,
-            itemBuilder: (context, index) => KosCard(kos: ownerKos[index]),
+            itemBuilder: (context, index) {
+              final kos = ownerKos[index];
+              return Column(
+                children: [
+                  KosCard(kos: kos),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        OutlinedButton.icon(
+                          key: Key('editKos_${kos.id}'),
+                          onPressed: () => _openKosForm(context, kos: kos),
+                          icon: const Icon(Icons.edit_outlined),
+                          label: const Text('Ubah'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Theme.of(context)
+                                .colorScheme
+                                .primary,
+                            side: BorderSide(
+                              color: Theme.of(context).colorScheme.primary
+                                  .withAlpha(110),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        OutlinedButton.icon(
+                          key: Key('deleteKos_${kos.id}'),
+                          onPressed: () => _confirmDelete(context, kos),
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('Hapus'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Theme.of(context)
+                                .colorScheme
+                                .error,
+                            side: BorderSide(
+                              color: Theme.of(context).colorScheme.error
+                                  .withAlpha(110),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),

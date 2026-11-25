@@ -174,4 +174,96 @@ void main() {
       );
     },
   );
+
+  testWidgets('prefills and updates an existing listing on the dashboard', (
+    tester,
+  ) async {
+    var roomsAvailable = 2;
+    kosProvider = KosProvider(
+      repository: KosRepository(
+        currentUserIdFetcher: () => 'owner-current',
+        customFetcher: () async => [
+          {
+            'id': 'kos-existing',
+            'owner_id': 'owner-current',
+            'name': 'Kos Sakura',
+            'area': 'Kukusan',
+            'price': 1000000,
+            'type': 'Putri',
+            'facilities': ['Wi-Fi', 'AC'],
+            'rooms_available': roomsAvailable,
+            'contact_name': 'Ibu Ani',
+            'contact_phone': '0812345678',
+          },
+        ],
+        customUpdater: (id, payload) async {
+          roomsAvailable = payload['rooms_available'] as int;
+          return {...payload, 'id': id, 'owner_id': 'owner-current'};
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<KosProvider>.value(
+        value: kosProvider,
+        child: MaterialApp(
+          home: OwnerDashboardScreen(authProvider: authProvider),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('editKos_kos-existing')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ubah Kos'), findsOneWidget);
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const Key('kosNameField')))
+          .controller!
+          .text,
+      'Kos Sakura',
+    );
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const Key('kosAreaField')))
+          .controller!
+          .text,
+      'Kukusan',
+    );
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const Key('kosPriceField')))
+          .controller!
+          .text,
+      '1000000',
+    );
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const Key('kosRoomsField')))
+          .controller!
+          .text,
+      '2',
+    );
+    expect(find.text('Putri'), findsOneWidget);
+    expect(
+      tester
+          .widget<CheckboxListTile>(find.byKey(const Key('kosFacility_Wi-Fi')))
+          .value,
+      isTrue,
+    );
+
+    await enterField(tester, 'kosRoomsField', '0');
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('kosSaveButton')),
+      250,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.byKey(const Key('kosSaveButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(OwnerDashboardScreen), findsOneWidget);
+    expect(find.text('Penuh'), findsOneWidget);
+    expect(kosProvider.kosList.single.roomsAvailable, 0);
+    expect(roomsAvailable, 0);
+  });
 }
