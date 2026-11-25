@@ -43,8 +43,12 @@ void main() {
   late _FakeAuthRepository authRepository;
   late AuthProvider authProvider;
   late KosProvider kosProvider;
+  var failInsert = false;
+  var failUpdate = false;
 
   setUp(() async {
+    failInsert = false;
+    failUpdate = false;
     authRepository = _FakeAuthRepository();
     authProvider = AuthProvider(repository: authRepository);
     await authProvider.signIn(email: 'owner@example.com', password: 'secret1');
@@ -52,7 +56,14 @@ void main() {
       repository: KosRepository(
         currentUserIdFetcher: () => 'owner-current',
         customFetcher: () async => [],
-        customInserter: (payload) async => {...payload, 'id': 'kos-created'},
+        customInserter: (payload) async {
+          if (failInsert) throw StateError('raw connection details');
+          return {...payload, 'id': 'kos-created'};
+        },
+        customUpdater: (id, payload) async {
+          if (failUpdate) throw StateError('raw connection details');
+          return {...payload, 'id': id, 'owner_id': 'owner-current'};
+        },
       ),
     );
   });
@@ -149,6 +160,37 @@ void main() {
     expect(find.text('Sisa kamar tidak boleh negatif'), findsOneWidget);
     expect(kosProvider.kosList, isEmpty);
     expect(find.byType(KosFormScreen), findsOneWidget);
+  });
+
+  testWidgets('retries a failed listing save with the entered form values', (
+    tester,
+  ) async {
+    failInsert = true;
+    await openForm(tester);
+    await enterValidForm(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('kosSaveButton')),
+      250,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.byKey(const Key('kosSaveButton')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Tidak dapat menambahkan listing. Periksa koneksi internet Anda, lalu coba lagi.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('kosFormRetryButton')), findsOneWidget);
+
+    failInsert = false;
+    await tester.ensureVisible(find.byKey(const Key('kosFormRetryButton')));
+    await tester.tap(find.byKey(const Key('kosFormRetryButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(OwnerDashboardScreen), findsOneWidget);
+    expect(kosProvider.kosList.single.name, 'Kos Sakura');
   });
 
   testWidgets(
@@ -288,5 +330,71 @@ void main() {
     expect(find.text('Penuh'), findsOneWidget);
     expect(kosProvider.kosList.single.roomsAvailable, 0);
     expect(roomsAvailable, 0);
+  });
+
+  testWidgets('retries a failed listing update with the edited values', (
+    tester,
+  ) async {
+    kosProvider.dispose();
+    kosProvider = KosProvider(
+      repository: KosRepository(
+        currentUserIdFetcher: () => 'owner-current',
+        customFetcher: () async => [
+          {
+            'id': 'kos-existing',
+            'owner_id': 'owner-current',
+            'name': 'Kos Sakura',
+            'area': 'Kukusan',
+            'price': 1000000,
+            'type': 'Putri',
+            'facilities': ['Wi-Fi'],
+            'rooms_available': 2,
+            'contact_name': 'Ibu Ani',
+            'contact_phone': '0812345678',
+          },
+        ],
+        customUpdater: (id, payload) async {
+          if (failUpdate) throw StateError('raw connection details');
+          return {...payload, 'id': id, 'owner_id': 'owner-current'};
+        },
+      ),
+    );
+    failUpdate = true;
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<KosProvider>.value(
+        value: kosProvider,
+        child: MaterialApp(
+          home: OwnerDashboardScreen(authProvider: authProvider),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('editKos_kos-existing')));
+    await tester.pumpAndSettle();
+    await enterField(tester, 'kosRoomsField', '0');
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('kosSaveButton')),
+      250,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.byKey(const Key('kosSaveButton')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Tidak dapat memperbarui listing. Periksa koneksi internet Anda, lalu coba lagi.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('kosFormRetryButton')), findsOneWidget);
+
+    failUpdate = false;
+    await tester.ensureVisible(find.byKey(const Key('kosFormRetryButton')));
+    await tester.tap(find.byKey(const Key('kosFormRetryButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(OwnerDashboardScreen), findsOneWidget);
+    expect(kosProvider.kosList.single.roomsAvailable, 0);
   });
 }

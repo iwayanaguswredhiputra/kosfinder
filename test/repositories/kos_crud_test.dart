@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kosfinder/models/kos_model.dart';
 import 'package:kosfinder/providers/kos_provider.dart';
 import 'package:kosfinder/repositories/kos_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   const ownerId = 'owner-current';
@@ -86,8 +87,7 @@ void main() {
         },
       );
 
-      final updated =
-          await repository.updateKos(makeKos(roomsAvailable: 0));
+      final updated = await repository.updateKos(makeKos(roomsAvailable: 0));
 
       expect(updatedId, 'kos-1');
       expect(updatePayload?['rooms_available'], 0);
@@ -106,19 +106,93 @@ void main() {
       expect(deletedId, 'kos-1');
     });
 
+    test('CRUD failures are mapped to friendly messages', () async {
+      final networkFailureRepository = KosRepository(
+        currentUserIdFetcher: () => ownerId,
+        customInserter: (_) async => throw StateError('raw network details'),
+      );
+      await expectLater(
+        networkFailureRepository.addKos(makeKos()),
+        throwsA(
+          isA<KosRepositoryException>()
+              .having(
+                (error) => error.message,
+                'message',
+                'Tidak dapat menambahkan listing. Periksa koneksi internet Anda, lalu coba lagi.',
+              )
+              .having(
+                (error) => error.message.contains('raw network details'),
+                'does not expose technical details',
+                isFalse,
+              ),
+        ),
+      );
+
+      final permissionFailureRepository = KosRepository(
+        customUpdater: (_, _) async => throw const PostgrestException(
+          message: 'row-level security policy violation',
+          code: '42501',
+        ),
+        customDeleter: (_) async => throw const PostgrestException(
+          message: 'permission denied',
+          code: '42501',
+        ),
+      );
+      await expectLater(
+        permissionFailureRepository.updateKos(makeKos()),
+        throwsA(
+          isA<KosRepositoryException>().having(
+            (error) => error.message,
+            'message',
+            'Anda tidak memiliki izin untuk memperbarui listing ini.',
+          ),
+        ),
+      );
+      await expectLater(
+        permissionFailureRepository.deleteKos('kos-1'),
+        throwsA(
+          isA<KosRepositoryException>().having(
+            (error) => error.message,
+            'message',
+            'Anda tidak memiliki izin untuk menghapus listing ini.',
+          ),
+        ),
+      );
+
+      final dataFailureRepository = KosRepository(
+        currentUserIdFetcher: () => ownerId,
+        customInserter: (_) async => throw const PostgrestException(
+          message: 'check constraint failed: rooms_available >= 0',
+          code: '23514',
+        ),
+      );
+      await expectLater(
+        dataFailureRepository.addKos(makeKos()),
+        throwsA(
+          isA<KosRepositoryException>().having(
+            (error) => error.message,
+            'message',
+            'Listing tidak dapat ditambahkan. Periksa kembali data yang dimasukkan.',
+          ),
+        ),
+      );
+    });
+
     test('provider updates local state only after successful CRUD', () async {
       final provider = KosProvider(
         repository: KosRepository(
           currentUserIdFetcher: () => ownerId,
-          customInserter: (payload) async =>
-              {...payload, 'id': 'kos-1'},
+          customInserter: (payload) async => {...payload, 'id': 'kos-1'},
           customUpdater: (id, payload) async => persistedKos(
             id: id,
             ownerId: ownerId,
             roomsAvailable: payload['rooms_available'] as int,
           ),
           customDeleter: (_) async {
-            throw const KosRepositoryException('Unauthorized / Forbidden');
+            throw const PostgrestException(
+              message: 'row-level security policy violation',
+              code: '42501',
+            );
           },
         ),
       );
@@ -137,38 +211,47 @@ void main() {
           isA<KosRepositoryException>().having(
             (error) => error.message,
             'message',
-            'Unauthorized / Forbidden',
+            'Anda tidak memiliki izin untuk menghapus listing ini.',
           ),
         ),
       );
       expect(provider.kosList, hasLength(1));
     });
 
-    test('provider preserves listing when RLS rejects update or delete', () async {
-      final original = persistedKos();
-      final provider = KosProvider(
-        repository: KosRepository(
-          customFetcher: () async => [original],
-          customUpdater: (_, _) async {
-            throw const KosRepositoryException('Unauthorized / Forbidden');
-          },
-          customDeleter: (_) async {
-            throw const KosRepositoryException('Unauthorized / Forbidden');
-          },
-        ),
-      );
-      await provider.fetchKosList();
+    test(
+      'provider preserves listing when RLS rejects update or delete',
+      () async {
+        final original = persistedKos();
+        final provider = KosProvider(
+          repository: KosRepository(
+            customFetcher: () async => [original],
+            customUpdater: (_, _) async {
+              throw const PostgrestException(
+                message: 'row-level security policy violation',
+                code: '42501',
+              );
+            },
+            customDeleter: (_) async {
+              throw const PostgrestException(
+                message: 'row-level security policy violation',
+                code: '42501',
+              );
+            },
+          ),
+        );
+        await provider.fetchKosList();
 
-      await expectLater(
-        provider.updateKos(makeKos(roomsAvailable: 0)),
-        throwsA(isA<KosRepositoryException>()),
-      );
-      await expectLater(
-        provider.deleteKos('kos-1'),
-        throwsA(isA<KosRepositoryException>()),
-      );
+        await expectLater(
+          provider.updateKos(makeKos(roomsAvailable: 0)),
+          throwsA(isA<KosRepositoryException>()),
+        );
+        await expectLater(
+          provider.deleteKos('kos-1'),
+          throwsA(isA<KosRepositoryException>()),
+        );
 
-      expect(provider.kosList.single.roomsAvailable, 2);
-    });
+        expect(provider.kosList.single.roomsAvailable, 2);
+      },
+    );
   });
 }

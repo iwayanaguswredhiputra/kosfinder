@@ -159,15 +159,31 @@ class _AuthScreenState extends State<AuthScreen>
                               if (errorMessage == null) {
                                 return const SizedBox.shrink();
                               }
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: Text(
-                                  errorMessage,
-                                  key: const Key('authErrorMessage'),
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.error,
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 4),
+                                    child: Text(
+                                      errorMessage,
+                                      key: const Key('authErrorMessage'),
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .error,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  TextButton.icon(
+                                    key: const Key('authRetryButton'),
+                                    onPressed: authProvider.isLoading
+                                        ? null
+                                        : () => _submit(authProvider),
+                                    icon: const Icon(Icons.refresh),
+                                    label: const Text('Coba Lagi'),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
                               );
                             },
                           ),

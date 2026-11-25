@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/kos_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/kos_provider.dart';
+import '../repositories/kos_repository.dart';
 import '../widgets/filter_modal.dart';
 
 class KosFormScreen extends StatefulWidget {
@@ -127,7 +128,7 @@ class _KosFormScreenState extends State<KosFormScreen> {
     } catch (error) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Gagal menyimpan listing: $error';
+          _errorMessage = error is KosRepositoryException ? error.message : 'Tidak dapat menyimpan listing. Periksa koneksi internet Anda, lalu coba lagi.';
           _isSaving = false;
         });
       }
@@ -282,6 +283,12 @@ class _KosFormScreenState extends State<KosFormScreen> {
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
                     ),
+                  ),
+                  TextButton.icon(
+                    key: const Key('kosFormRetryButton'),
+                    onPressed: _isSaving ? null : _save,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Coba Lagi'),
                   ),
                 ],
                 const SizedBox(height: 20),

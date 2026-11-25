@@ -119,6 +119,9 @@ void main() {
   testWidgets('shows the network error for login and registration', (
     tester,
   ) async {
+    var signUpAttempts = 0;
+    String? submittedEmail;
+    String? submittedPassword;
     Future<AuthResponse> networkFailure(String _, String _) async {
       throw AuthRetryableFetchException(message: 'Network unavailable');
     }
@@ -140,6 +143,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(message), findsOneWidget);
+    expect(find.byKey(const Key('authRetryButton')), findsOneWidget);
+
+    final session = _testSession();
+    repository.signUpHandler = (email, password) async {
+      signUpAttempts++;
+      submittedEmail = email;
+      submittedPassword = password;
+      return AuthResponse(session: session, user: session.user);
+    };
+    await tester.tap(find.byKey(const Key('authRetryButton')));
+    await tester.pumpAndSettle();
+
+    expect(signUpAttempts, 1);
+    expect(submittedEmail, 'owner@example.com');
+    expect(submittedPassword, 'secret1');
+    expect(find.byType(OwnerDashboardScreen), findsOneWidget);
   });
 
   testWidgets('successful login navigates to the owner dashboard', (

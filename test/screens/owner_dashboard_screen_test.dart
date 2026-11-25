@@ -128,12 +128,14 @@ void main() {
   ) async {
     await authProvider.signIn(email: 'owner@example.com', password: 'secret1');
     String? deletedId;
+    var failDelete = true;
     final ownerKosProvider = KosProvider(
       repository: KosRepository(
         customFetcher: () async => [
           _kosMap('mine', 'owner-current', 'Kos Saya'),
         ],
         customDeleter: (id) async {
+          if (failDelete) throw StateError('raw connection details');
           deletedId = id;
         },
       ),
@@ -164,6 +166,19 @@ void main() {
     await tester.tap(find.byKey(const Key('deleteKos_mine')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('confirmDeleteKosButton')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Tidak dapat menghapus listing. Periksa koneksi internet Anda, lalu coba lagi.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('ownerDeleteRetryButton')), findsOneWidget);
+    expect(deletedId, isNull);
+
+    failDelete = false;
+    await tester.tap(find.byKey(const Key('ownerDeleteRetryButton')));
     await tester.pumpAndSettle();
 
     expect(deletedId, 'mine');

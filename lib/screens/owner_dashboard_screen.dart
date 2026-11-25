@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/kos_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/kos_provider.dart';
+import '../repositories/kos_repository.dart';
 import '../widgets/kos_card.dart';
 import 'kos_form_screen.dart';
 
@@ -18,6 +19,9 @@ class OwnerDashboardScreen extends StatefulWidget {
 
 class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   late final KosProvider _kosProvider;
+  KosModel? _failedDeleteKos;
+  String? _deleteErrorMessage;
+  bool _isDeleting = false;
 
   @override
   void initState() {
@@ -65,13 +69,31 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
     );
     if (shouldDelete != true) return;
 
+    await _deleteKos(kos);
+  }
+
+  Future<void> _deleteKos(KosModel kos) async {
+    setState(() {
+      _isDeleting = true;
+      _failedDeleteKos = kos;
+      _deleteErrorMessage = null;
+    });
     try {
       await _kosProvider.deleteKos(kos.id);
+      if (!mounted) return;
+      setState(() {
+        _failedDeleteKos = null;
+        _deleteErrorMessage = null;
+      });
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menghapus listing: $error')),
-      );
+      setState(() {
+        _deleteErrorMessage = error is KosRepositoryException ? error.message : 'Tidak dapat menghapus listing. Periksa koneksi internet Anda, lalu coba lagi.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isDeleting = false);
+      }
     }
   }
 
@@ -166,58 +188,87 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             );
           }
 
-          return ListView.builder(
-            key: const Key('ownerKosList'),
-            itemCount: ownerKos.length,
-            itemBuilder: (context, index) {
-              final kos = ownerKos[index];
-              return Column(
-                children: [
-                  KosCard(kos: kos),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+          return Column(
+            children: [
+              if (_deleteErrorMessage != null && _failedDeleteKos != null)
+                MaterialBanner(
+                  content: Text(
+                    _deleteErrorMessage!,
+                    key: const Key('ownerDeleteErrorMessage'),
+                  ),
+                  actions: [
+                    TextButton(
+                      key: const Key('ownerDeleteRetryButton'),
+                      onPressed: _isDeleting
+                          ? null
+                          : () => _deleteKos(_failedDeleteKos!),
+                      child: const Text('Coba Lagi'),
+                    ),
+                  ],
+                ),
+              Expanded(
+                child: ListView.builder(
+                  key: const Key('ownerKosList'),
+                  itemCount: ownerKos.length,
+                  itemBuilder: (context, index) {
+                    final kos = ownerKos[index];
+                    return Column(
                       children: [
-                        OutlinedButton.icon(
-                          key: Key('editKos_${kos.id}'),
-                          onPressed: () => _openKosForm(context, kos: kos),
-                          icon: const Icon(Icons.edit_outlined),
-                          label: const Text('Ubah'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Theme.of(context)
-                                .colorScheme
-                                .primary,
-                            side: BorderSide(
-                              color: Theme.of(context).colorScheme.primary
-                                  .withAlpha(110),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        OutlinedButton.icon(
-                          key: Key('deleteKos_${kos.id}'),
-                          onPressed: () => _confirmDelete(context, kos),
-                          icon: const Icon(Icons.delete_outline),
-                          label: const Text('Hapus'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Theme.of(context)
-                                .colorScheme
-                                .error,
-                            side: BorderSide(
-                              color: Theme.of(context).colorScheme.error
-                                  .withAlpha(110),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                        KosCard(kos: kos),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              OutlinedButton.icon(
+                                key: Key('editKos_${kos.id}'),
+                                onPressed: () =>
+                                    _openKosForm(context, kos: kos),
+                                icon: const Icon(Icons.edit_outlined),
+                                label: const Text('Ubah'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .primary,
+                                  side: BorderSide(
+                                    color: Theme.of(context).colorScheme.primary
+                                        .withAlpha(110),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              OutlinedButton.icon(
+                                key: Key('deleteKos_${kos.id}'),
+                                onPressed: _isDeleting
+                                    ? null
+                                    : () => _confirmDelete(context, kos),
+                                icon: const Icon(Icons.delete_outline),
+                                label: const Text('Hapus'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .error,
+                                  side: BorderSide(
+                                    color: Theme.of(context).colorScheme.error
+                                        .withAlpha(110),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                ],
-              );
-            },
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),

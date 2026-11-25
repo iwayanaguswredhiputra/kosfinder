@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/kos_model.dart';
 
 class KosRepositoryException implements Exception {
   final String message;
-  const KosRepositoryException([this.message = 'Gagal memuat data, periksa koneksi Anda']);
+  const KosRepositoryException([
+    this.message = 'Gagal memuat data, periksa koneksi Anda',
+  ]);
 
   @override
   String toString() => message;
@@ -14,11 +17,9 @@ class KosRepository {
   final SupabaseClient? client;
   final Future<List<Map<String, dynamic>>> Function()? customFetcher;
   final Future<Map<String, dynamic>> Function(Map<String, dynamic>)?
-      customInserter;
-  final Future<Map<String, dynamic>> Function(
-    String,
-    Map<String, dynamic>,
-  )? customUpdater;
+  customInserter;
+  final Future<Map<String, dynamic>> Function(String, Map<String, dynamic>)?
+  customUpdater;
   final Future<void> Function(String)? customDeleter;
   final String? Function()? currentUserIdFetcher;
 
@@ -69,45 +70,95 @@ class KosRepository {
     };
   }
 
+  Future<T> _runCrudOperation<T>(
+    Future<T> Function() operation, {
+    required String connectionMessage,
+    required String dataMessage,
+    required String permissionMessage,
+  }) async {
+    try {
+      return await operation();
+    } on PostgrestException catch (error) {
+      final code = error.code;
+      final message = error.message.toLowerCase();
+      final isPermissionError =
+          code == '42501' ||
+          code == '401' ||
+          code == '403' ||
+          message.contains('row-level security') ||
+          message.contains('permission denied') ||
+          message.contains('unauthorized') ||
+          message.contains('forbidden');
+      throw KosRepositoryException(
+        isPermissionError ? permissionMessage : dataMessage,
+      );
+    } catch (_) {
+      throw KosRepositoryException(connectionMessage);
+    }
+  }
+
   Future<KosModel> addKos(KosModel kos) async {
     final payload = _insertPayload(kos, _requireCurrentUserId());
-    final inserter = customInserter;
-    final data = inserter != null
-        ? await inserter(payload)
-        : await supabaseClient
-            .from('kos')
-            .insert(payload)
-            .select()
-            .single();
-    return KosModel.fromJson(data);
+    return _runCrudOperation(
+      () async {
+        final inserter = customInserter;
+        final data = inserter != null
+            ? await inserter(payload)
+            : await supabaseClient
+                  .from('kos')
+                  .insert(payload)
+                  .select()
+                  .single();
+        return KosModel.fromJson(data);
+      },
+      connectionMessage: 'Tidak dapat menambahkan listing. Periksa koneksi internet Anda, lalu coba lagi.',
+      dataMessage: 'Listing tidak dapat ditambahkan. Periksa kembali data yang dimasukkan.',
+      permissionMessage: 'Anda tidak memiliki izin untuk menambahkan listing.',
+    );
   }
 
   Future<KosModel> updateKos(KosModel kos) async {
     final payload = _updatePayload(kos);
-    final updater = customUpdater;
-    final data = updater != null
-        ? await updater(kos.id, payload)
-        : await supabaseClient
-            .from('kos')
-            .update(payload)
-            .eq('id', kos.id)
-            .select()
-            .single();
-    return KosModel.fromJson(data);
+    return _runCrudOperation(
+      () async {
+        final updater = customUpdater;
+        final data = updater != null
+            ? await updater(kos.id, payload)
+            : await supabaseClient
+                  .from('kos')
+                  .update(payload)
+                  .eq('id', kos.id)
+                  .select()
+                  .single();
+        return KosModel.fromJson(data);
+      },
+      connectionMessage: 'Tidak dapat memperbarui listing. Periksa koneksi internet Anda, lalu coba lagi.',
+      dataMessage: 'Listing tidak dapat diperbarui. Periksa kembali data yang dimasukkan.',
+      permissionMessage:
+          'Anda tidak memiliki izin untuk memperbarui listing ini.',
+    );
   }
 
   Future<void> deleteKos(String id) async {
-    final deleter = customDeleter;
-    if (deleter != null) {
-      await deleter(id);
-      return;
-    }
-    await supabaseClient
-        .from('kos')
-        .delete()
-        .eq('id', id)
-        .select('id')
-        .single();
+    await _runCrudOperation(
+      () async {
+        final deleter = customDeleter;
+        if (deleter != null) {
+          await deleter(id);
+          return;
+        }
+        await supabaseClient
+            .from('kos')
+            .delete()
+            .eq('id', id)
+            .select('id')
+            .single();
+      },
+      connectionMessage: 'Tidak dapat menghapus listing. Periksa koneksi internet Anda, lalu coba lagi.',
+      dataMessage: 'Listing tidak dapat dihapus. Silakan coba lagi.',
+      permissionMessage:
+          'Anda tidak memiliki izin untuk menghapus listing ini.',
+    );
   }
 
   Future<List<KosModel>> getKosList() async {
@@ -129,7 +180,9 @@ class KosRepository {
       rethrow;
     } catch (e) {
       debugPrint('SUPABASE_ERROR: $e');
-      throw const KosRepositoryException('Gagal memuat data, periksa koneksi Anda');
+      throw const KosRepositoryException(
+        'Gagal memuat data, periksa koneksi Anda',
+      );
     }
   }
 }
