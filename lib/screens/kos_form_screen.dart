@@ -76,6 +76,18 @@ class _KosFormScreenState extends State<KosFormScreen> {
     return null;
   }
 
+  int get _roomsAvailable => int.tryParse(_roomsController.text.trim()) ?? 0;
+
+  void _changeRoomsAvailable(int change) {
+    final roomsAvailable = (_roomsAvailable + change).clamp(0, 2147483647);
+    final value = roomsAvailable.toString();
+    _roomsController.value = TextEditingValue(
+      text: value,
+      selection: TextSelection.collapsed(offset: value.length),
+    );
+    setState(() {});
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -209,7 +221,30 @@ class _KosFormScreenState extends State<KosFormScreen> {
                 TextFormField(
                   key: const Key('kosRoomsField'),
                   controller: _roomsController,
-                  decoration: const InputDecoration(labelText: 'Sisa kamar'),
+                  onChanged: widget.kos == null ? null : (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: 'Sisa kamar',
+                    prefixIcon: widget.kos == null
+                        ? null
+                        : IconButton(
+                            key: const Key('decreaseRoomsButton'),
+                            tooltip: 'Kurangi sisa kamar',
+                            onPressed: _isSaving || _roomsAvailable == 0
+                                ? null
+                                : () => _changeRoomsAvailable(-1),
+                            icon: const Icon(Icons.remove),
+                          ),
+                    suffixIcon: widget.kos == null
+                        ? null
+                        : IconButton(
+                            key: const Key('increaseRoomsButton'),
+                            tooltip: 'Tambah sisa kamar',
+                            onPressed: _isSaving
+                                ? null
+                                : () => _changeRoomsAvailable(1),
+                            icon: const Icon(Icons.add),
+                          ),
+                  ),
                   keyboardType: const TextInputType.numberWithOptions(
                     signed: true,
                   ),

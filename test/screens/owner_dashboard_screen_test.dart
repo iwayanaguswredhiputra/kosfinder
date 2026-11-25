@@ -117,6 +117,10 @@ void main() {
     );
     expect(find.text('Kos Orang Lain'), findsNothing);
     expect(find.byKey(const Key('ownerKosList')), findsOneWidget);
+    expect(find.byKey(const Key('decreaseRooms_mine')), findsNothing);
+    expect(find.byKey(const Key('increaseRooms_mine')), findsNothing);
+    expect(find.byKey(const Key('editKos_mine')), findsOneWidget);
+    expect(find.byKey(const Key('deleteKos_mine')), findsOneWidget);
   });
 
   testWidgets('canceling delete keeps the listing and confirming removes it', (

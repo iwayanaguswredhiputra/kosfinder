@@ -252,7 +252,30 @@ void main() {
       isTrue,
     );
 
-    await enterField(tester, 'kosRoomsField', '0');
+    final roomsField = find.byKey(const Key('kosRoomsField'));
+    await tester.scrollUntilVisible(
+      roomsField,
+      250,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.byKey(const Key('decreaseRoomsButton')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextFormField>(roomsField).controller!.text, '1');
+    await tester.tap(find.byKey(const Key('decreaseRoomsButton')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextFormField>(roomsField).controller!.text, '0');
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('decreaseRoomsButton')))
+          .onPressed,
+      isNull,
+    );
+    await tester.tap(find.byKey(const Key('increaseRoomsButton')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextFormField>(roomsField).controller!.text, '1');
+    await tester.tap(find.byKey(const Key('decreaseRoomsButton')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextFormField>(roomsField).controller!.text, '0');
     await tester.scrollUntilVisible(
       find.byKey(const Key('kosSaveButton')),
       250,
