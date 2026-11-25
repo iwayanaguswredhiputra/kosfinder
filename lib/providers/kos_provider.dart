@@ -87,4 +87,27 @@ class KosProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> addKos(KosModel kos) async {
+    final createdKos = await _repository.addKos(kos);
+    _kosList = [createdKos, ..._kosList];
+    notifyListeners();
+  }
+
+  Future<void> updateKos(KosModel kos) async {
+    final updatedKos = await _repository.updateKos(kos);
+    final index = _kosList.indexWhere((item) => item.id == updatedKos.id);
+    if (index == -1) {
+      _kosList = [updatedKos, ..._kosList];
+    } else {
+      _kosList[index] = updatedKos;
+    }
+    notifyListeners();
+  }
+
+  Future<void> deleteKos(String id) async {
+    await _repository.deleteKos(id);
+    _kosList = _kosList.where((kos) => kos.id != id).toList();
+    notifyListeners();
+  }
 }
