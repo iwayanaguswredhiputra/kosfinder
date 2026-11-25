@@ -25,9 +25,9 @@ Setiap slice menghasilkan aplikasi yang dapat dijalankan (*runnable*).
 
 | ID | Tujuan | Story & AC Terkait | File yang Boleh Diubah | Cara Menguji | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T07 | Implementasi logika filter dan pencarian area case-insensitive pada KosProvider | US01-AC2, US02-AC1 | `lib/providers/kos_provider.dart` | `flutter test test/providers/kos_search_filter_test.dart` & `flutter analyze` | Pending |
-| T08 | Implementasi kolom search bar area dan tampilan status kosong jika tidak ditemukan di KosListScreen | US01-AC2, US01-AC3 | `lib/screens/kos_list_screen.dart` | `flutter run`, ketik area di kolom pencarian dan verifikasi tampilan hasil / pesan kosong | Pending |
-| T09 | Implementasi modal filter (tipe kos, slider/input harga maksimal, checklist fasilitas) dan reset filter | US02-AC1, US02-AC2 | `lib/widgets/filter_modal.dart`, `lib/screens/kos_list_screen.dart` | `flutter run`, terapkan filter spesifik dan verifikasi hasil filter serta fungsi reset | Pending |
+| T07 | Implementasi logika filter dan pencarian area case-insensitive pada KosProvider | US01-AC2, US02-AC1 | `lib/providers/kos_provider.dart` | `flutter test test/providers/kos_search_filter_test.dart` & `flutter analyze` | Selesai |
+| T08 | Implementasi kolom search bar area dan tampilan status kosong jika tidak ditemukan di KosListScreen | US01-AC2, US01-AC3 | `lib/screens/kos_list_screen.dart` | `flutter run`, ketik area di kolom pencarian dan verifikasi tampilan hasil / pesan kosong | Selesai |
+| T09 | Implementasi modal filter (tipe kos, slider/input harga maksimal, checklist fasilitas) dan reset filter | US02-AC1, US02-AC2 | `lib/widgets/filter_modal.dart`, `lib/screens/kos_list_screen.dart` | `flutter run`, terapkan filter spesifik dan verifikasi hasil filter serta fungsi reset | Selesai |
 
 ---
 
@@ -36,7 +36,7 @@ Setiap slice menghasilkan aplikasi yang dapat dijalankan (*runnable*).
 
 | ID | Tujuan | Story & AC Terkait | File yang Boleh Diubah | Cara Menguji | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T10 | Implementasi AuthRepository untuk register, login, logout, dan memantau sesi auth Supabase | US04-AC1, US04-AC4 | `lib/repositories/auth_repository.dart` | `flutter test test/repositories/auth_repository_test.dart` & `flutter analyze` | Pending |
+| T10 | Implementasi AuthRepository untuk register, login, logout, dan memantau sesi auth Supabase | US04-AC1, US04-AC4 | `lib/repositories/auth_repository.dart` | `flutter test test/repositories/auth_repository_test.dart` & `flutter analyze` | Selesai |
 | T11 | Implementasi AuthProvider untuk mengelola status autentikasi dan integrasikan di main.dart | US04-AC1, US04-AC2, US04-AC3, US04-AC4 | `lib/providers/auth_provider.dart`, `lib/main.dart` | `flutter test test/providers/auth_provider_test.dart` & `flutter analyze` | Pending |
 | T12 | Implementasi AuthScreen (tab Login dan Registrasi) dengan validasi form dan pesan error | US04-AC1, US04-AC2, US04-AC3 | `lib/screens/auth_screen.dart`, `lib/screens/kos_list_screen.dart` | `flutter run`, uji login dengan kredensial salah dan benar serta cek pesan validasi | Pending |
 | T13 | Implementasi kerangka OwnerDashboardScreen dengan tombol logout dan pesan jika belum ada listing | US04-AC4, US06-AC4 | `lib/screens/owner_dashboard_screen.dart`, `lib/screens/auth_screen.dart` | `flutter run`, login ke dashboard lalu tap logout dan pastikan kembali ke halaman utama | Pending |
