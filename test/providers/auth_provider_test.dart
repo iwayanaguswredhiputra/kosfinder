@@ -107,6 +107,34 @@ void main() {
     expect(provider.isLoading, isFalse);
   });
 
+  test('signUp reports an already registered email specifically', () async {
+    repository.signUpHandler = (_, _) async {
+      throw const AuthException(
+        'User already registered',
+        code: 'user_already_exists',
+      );
+    };
+
+    await provider.signUp(email: 'owner@example.com', password: 'secret1');
+
+    expect(provider.isAuthenticated, isFalse);
+    expect(provider.errorMessage, 'Email sudah terdaftar');
+    expect(provider.isLoading, isFalse);
+  });
+
+  test('signUp reports other failures as registration errors', () async {
+    repository.signUpHandler = (_, _) async {
+      throw const AuthException(
+        'Signups are disabled',
+        code: 'signup_disabled',
+      );
+    };
+
+    await provider.signUp(email: 'owner@example.com', password: 'secret1');
+
+    expect(provider.errorMessage, 'Gagal mendaftar: Signups are disabled');
+  });
+
   test(
     'auth requests report network failures with the required message',
     () async {

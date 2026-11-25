@@ -7,6 +7,8 @@ import '../repositories/auth_repository.dart';
 
 class AuthProvider extends ChangeNotifier {
   static const _invalidCredentialsMessage = 'Email atau kata sandi tidak valid';
+  static const _emailAlreadyRegisteredMessage = 'Email sudah terdaftar';
+  static const _signUpFailurePrefix = 'Gagal mendaftar: ';
   static const _networkErrorMessage =
       'Koneksi internet terputus, silakan coba beberapa saat lagi';
 
@@ -34,12 +36,14 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signUp({required String email, required String password}) async {
     await _runAuthRequest(
       () => _repository.signUp(email: email, password: password),
+      operation: _AuthOperation.signUp,
     );
   }
 
   Future<void> signIn({required String email, required String password}) async {
     await _runAuthRequest(
       () => _repository.signIn(email: email, password: password),
+      operation: _AuthOperation.signIn,
     );
   }
 
@@ -63,7 +67,10 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _runAuthRequest(Future<AuthResponse> Function() request) async {
+  Future<void> _runAuthRequest(
+    Future<AuthResponse> Function() request, {
+    required _AuthOperation operation,
+  }) async {
     _setLoading(true);
     _errorMessage = null;
     notifyListeners();
@@ -72,23 +79,41 @@ class AuthProvider extends ChangeNotifier {
       final response = await request();
       _session = response.session;
     } catch (error) {
-      _errorMessage = _messageFor(error, isCredentialsFailure: true);
+      _errorMessage = _messageFor(error, operation: operation);
     } finally {
       _setLoading(false);
     }
   }
 
-  String _messageFor(Object error, {bool isCredentialsFailure = false}) {
+  String _messageFor(Object error, {_AuthOperation? operation}) {
     if (error is AuthRetryableFetchException) {
       return _networkErrorMessage;
     }
-    if (isCredentialsFailure && error is AuthException) {
-      return _invalidCredentialsMessage;
-    }
     if (error is AuthException) {
+      if (operation == _AuthOperation.signIn) {
+        return _invalidCredentialsMessage;
+      }
+      if (operation == _AuthOperation.signUp) {
+        if (_isDuplicateEmailError(error)) {
+          return _emailAlreadyRegisteredMessage;
+        }
+        return '$_signUpFailurePrefix${error.message}';
+      }
       return error.message;
     }
     return error.toString();
+  }
+
+  bool _isDuplicateEmailError(AuthException error) {
+    final code = error.code?.toLowerCase();
+    if (code == 'user_already_exists' || code == 'email_exists') {
+      return true;
+    }
+
+    final message = error.message.toLowerCase();
+    return message.contains('already registered') ||
+        message.contains('already exists') ||
+        message.contains('already in use');
   }
 
   void _handleAuthState(AuthState state) {
@@ -112,3 +137,5 @@ class AuthProvider extends ChangeNotifier {
     super.dispose();
   }
 }
+
+enum _AuthOperation { signUp, signIn }
