@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +14,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class _FakeAuthRepository extends AuthRepository {
   final authChanges = StreamController<AuthState>.broadcast();
   bool signedOut = false;
+  Object? signOutError;
 
   @override
   Future<AuthResponse> signIn({
@@ -28,6 +30,7 @@ class _FakeAuthRepository extends AuthRepository {
 
   @override
   Future<void> signOut() async {
+    if (signOutError != null) throw signOutError!;
     signedOut = true;
   }
 }
@@ -190,6 +193,9 @@ void main() {
   testWidgets('logout signs out and returns to the home screen', (
     tester,
   ) async {
+    repository.signOutError = const SocketException(
+      'Failed host lookup: example.invalid',
+    );
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -212,6 +218,18 @@ void main() {
     await tester.tap(find.text('Beranda'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('ownerLogoutButton')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Koneksi internet terputus, silakan coba beberapa saat lagi'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Exception:'), findsNothing);
+    expect(find.byKey(const Key('ownerAuthRetryButton')), findsOneWidget);
+    expect(repository.signedOut, isFalse);
+
+    repository.signOutError = null;
+    await tester.tap(find.byKey(const Key('ownerAuthRetryButton')));
     await tester.pumpAndSettle();
 
     expect(repository.signedOut, isTrue);

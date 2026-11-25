@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/kos_model.dart';
 import '../repositories/kos_repository.dart';
+import '../utils/network_error.dart';
 
 class KosProvider extends ChangeNotifier {
   // Repository
@@ -19,7 +21,7 @@ class KosProvider extends ChangeNotifier {
 
   // Constructor
   KosProvider({KosRepository? repository})
-      : _repository = repository ?? KosRepository();
+    : _repository = repository ?? KosRepository();
 
   // Public getters for raw data
   List<KosModel> get kosList => _kosList;
@@ -46,7 +48,11 @@ class KosProvider extends ChangeNotifier {
       list = list.where((k) => k.type == _selectedType).toList();
     }
     if (_selectedFacilities.isNotEmpty) {
-      list = list.where((k) => _selectedFacilities.every((f) => k.facilities.contains(f))).toList();
+      list = list
+          .where(
+            (k) => _selectedFacilities.every((f) => k.facilities.contains(f)),
+          )
+          .toList();
     }
     return list;
   }
@@ -79,7 +85,9 @@ class KosProvider extends ChangeNotifier {
     try {
       _kosList = await _repository.getKosList();
     } on KosRepositoryException catch (e) {
-      _errorMessage = e.message;
+      _errorMessage = isNetworkError(e)
+          ? 'Gagal memuat data, periksa koneksi Anda'
+          : e.message;
     } catch (_) {
       _errorMessage = 'Gagal memuat data, periksa koneksi Anda';
     } finally {

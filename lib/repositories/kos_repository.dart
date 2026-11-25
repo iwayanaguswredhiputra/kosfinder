@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/kos_model.dart';
+import '../utils/network_error.dart';
 
 class KosRepositoryException implements Exception {
   final String message;
@@ -78,7 +78,14 @@ class KosRepository {
   }) async {
     try {
       return await operation();
-    } on PostgrestException catch (error) {
+    } catch (error) {
+      if (isNetworkError(error)) {
+        throw KosRepositoryException(connectionMessage);
+      }
+      if (error is! PostgrestException) {
+        throw KosRepositoryException(connectionMessage);
+      }
+
       final code = error.code;
       final message = error.message.toLowerCase();
       final isPermissionError =
@@ -92,8 +99,6 @@ class KosRepository {
       throw KosRepositoryException(
         isPermissionError ? permissionMessage : dataMessage,
       );
-    } catch (_) {
-      throw KosRepositoryException(connectionMessage);
     }
   }
 
@@ -176,10 +181,14 @@ class KosRepository {
       return data
           .map((item) => KosModel.fromJson(item as Map<String, dynamic>))
           .toList();
-    } on KosRepositoryException {
+    } on KosRepositoryException catch (error) {
+      if (isNetworkError(error)) {
+        throw const KosRepositoryException(
+          'Gagal memuat data, periksa koneksi Anda',
+        );
+      }
       rethrow;
-    } catch (e) {
-      debugPrint('SUPABASE_ERROR: $e');
+    } catch (_) {
       throw const KosRepositoryException(
         'Gagal memuat data, periksa koneksi Anda',
       );

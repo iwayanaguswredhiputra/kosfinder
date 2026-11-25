@@ -6,6 +6,7 @@ import '../models/kos_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/kos_provider.dart';
 import '../repositories/kos_repository.dart';
+import '../utils/network_error.dart';
 import '../widgets/filter_modal.dart';
 
 class KosFormScreen extends StatefulWidget {
@@ -128,7 +129,11 @@ class _KosFormScreenState extends State<KosFormScreen> {
     } catch (error) {
       if (mounted) {
         setState(() {
-          _errorMessage = error is KosRepositoryException ? error.message : 'Tidak dapat menyimpan listing. Periksa koneksi internet Anda, lalu coba lagi.';
+          _errorMessage = isNetworkError(error)
+              ? 'Koneksi internet terputus. Periksa koneksi Anda, lalu coba lagi.'
+              : error is KosRepositoryException
+              ? error.message
+              : 'Tidak dapat menyimpan listing. Periksa koneksi internet Anda, lalu coba lagi.';
           _isSaving = false;
         });
       }

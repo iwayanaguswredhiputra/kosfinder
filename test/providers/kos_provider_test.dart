@@ -62,6 +62,23 @@ void main() {
       expect(provider.kosList, isEmpty);
     });
 
+    test('fetchKosList sanitizes network details in repository exceptions', () async {
+      final repository = KosRepository(
+        customFetcher: () async {
+          throw const KosRepositoryException(
+            'SocketException: Failed host lookup: example.invalid',
+          );
+        },
+      );
+      final provider = KosProvider(repository: repository);
+
+      await provider.fetchKosList();
+
+      expect(provider.errorMessage, 'Gagal memuat data, periksa koneksi Anda');
+      expect(provider.errorMessage, isNot(contains('SocketException')));
+      expect(provider.errorMessage, isNot(contains('example.invalid')));
+    });
+
     test('fetchKosList clears errorMessage on retry success', () async {
       var shouldFail = true;
       final repository = KosRepository(

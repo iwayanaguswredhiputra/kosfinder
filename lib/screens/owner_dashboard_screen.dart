@@ -5,6 +5,7 @@ import '../models/kos_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/kos_provider.dart';
 import '../repositories/kos_repository.dart';
+import '../utils/network_error.dart';
 import '../widgets/kos_card.dart';
 import 'kos_form_screen.dart';
 
@@ -88,7 +89,11 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
     } catch (error) {
       if (!context.mounted) return;
       setState(() {
-        _deleteErrorMessage = error is KosRepositoryException ? error.message : 'Tidak dapat menghapus listing. Periksa koneksi internet Anda, lalu coba lagi.';
+        _deleteErrorMessage = isNetworkError(error)
+            ? 'Koneksi internet terputus. Periksa koneksi Anda, lalu coba lagi.'
+            : error is KosRepositoryException
+            ? error.message
+            : 'Tidak dapat menghapus listing. Periksa koneksi internet Anda, lalu coba lagi.';
       });
     } finally {
       if (mounted) {
@@ -122,6 +127,33 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
       body: ListenableBuilder(
         listenable: Listenable.merge([_kosProvider, widget.authProvider]),
         builder: (context, _) {
+          if (widget.authProvider.errorMessage != null) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.authProvider.errorMessage!,
+                      key: const Key('ownerAuthErrorMessage'),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
+                      key: const Key('ownerAuthRetryButton'),
+                      onPressed: widget.authProvider.isLoading
+                          ? null
+                          : () => _signOut(context),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Coba Lagi'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
           if (_kosProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }

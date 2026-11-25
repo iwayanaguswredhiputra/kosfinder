@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../repositories/auth_repository.dart';
+import '../utils/network_error.dart';
 
 class AuthProvider extends ChangeNotifier {
   static const _invalidCredentialsMessage = 'Email atau kata sandi tidak valid';
@@ -86,7 +87,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   String _messageFor(Object error, {_AuthOperation? operation}) {
-    if (error is AuthRetryableFetchException) {
+    if (isNetworkError(error)) {
       return _networkErrorMessage;
     }
     if (error is AuthException) {

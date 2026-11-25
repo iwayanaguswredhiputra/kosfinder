@@ -1,9 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kosfinder/providers/auth_provider.dart';
 import 'package:kosfinder/repositories/auth_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+class _ClientException implements Exception {
+  const _ClientException();
+}
 
 class _FakeAuthRepository extends AuthRepository {
   final authChanges = StreamController<AuthState>.broadcast();
@@ -149,6 +154,31 @@ void main() {
         'Koneksi internet terputus, silakan coba beberapa saat lagi',
       );
       expect(provider.isAuthenticated, isFalse);
+    },
+  );
+
+  test(
+    'maps socket, client, timeout, and DNS failures to a friendly message',
+    () async {
+      final networkErrors = <Object>[
+        const SocketException('Failed host lookup: example.invalid'),
+        TimeoutException('request timed out'),
+        const _ClientException(),
+        Exception('Failed host lookup: example.invalid'),
+      ];
+
+      for (final error in networkErrors) {
+        repository.signInHandler = (_, _) async => throw error;
+
+        await provider.signIn(email: 'owner@example.com', password: 'secret1');
+
+        expect(
+          provider.errorMessage,
+          'Koneksi internet terputus, silakan coba beberapa saat lagi',
+        );
+        expect(provider.errorMessage, isNot(contains('Exception:')));
+        expect(provider.errorMessage, isNot(contains('example.invalid')));
+      }
     },
   );
 

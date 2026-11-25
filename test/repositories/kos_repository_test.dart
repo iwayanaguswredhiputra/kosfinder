@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kosfinder/repositories/kos_repository.dart';
 
@@ -77,6 +79,37 @@ void main() {
           ),
         ),
       );
+    });
+
+    test('getKosList sanitizes client, timeout, and DNS failures', () async {
+      final networkErrors = <Object>[
+        Exception('ClientException: Failed to fetch'),
+        TimeoutException('request timed out'),
+        Exception('Failed host lookup: example.invalid'),
+      ];
+
+      for (final error in networkErrors) {
+        final repository = KosRepository(
+          customFetcher: () async => throw error,
+        );
+
+        await expectLater(
+          repository.getKosList(),
+          throwsA(
+            isA<KosRepositoryException>()
+                .having(
+                  (exception) => exception.message,
+                  'friendly message',
+                  'Gagal memuat data, periksa koneksi Anda',
+                )
+                .having(
+                  (exception) => exception.message.contains('Exception:'),
+                  'no exception prefix',
+                  isFalse,
+                ),
+          ),
+        );
+      }
     });
 
     test('getKosList rethrows existing KosRepositoryException as is', () async {
