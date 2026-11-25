@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kosfinder/providers/auth_provider.dart';
 import 'package:kosfinder/repositories/auth_repository.dart';
 import 'package:kosfinder/screens/auth_screen.dart';
+import 'package:kosfinder/screens/owner_dashboard_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class _FakeAuthRepository extends AuthRepository {
@@ -130,7 +131,7 @@ void main() {
     expect(find.text(message), findsOneWidget);
   });
 
-  testWidgets('successful login returns to the previous screen', (
+  testWidgets('successful login navigates to the owner dashboard', (
     tester,
   ) async {
     final session = _testSession();
@@ -158,11 +159,11 @@ void main() {
     await tester.tap(find.byKey(const Key('authSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Beranda'), findsOneWidget);
+    expect(find.byType(OwnerDashboardScreen), findsOneWidget);
     expect(authProvider.isAuthenticated, isTrue);
   });
 
-  testWidgets('successful registration returns to the previous screen', (
+  testWidgets('successful registration navigates to the owner dashboard', (
     tester,
   ) async {
     final session = _testSession();
@@ -192,7 +193,7 @@ void main() {
     await tester.tap(find.byKey(const Key('authSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Beranda'), findsOneWidget);
+    expect(find.byType(OwnerDashboardScreen), findsOneWidget);
     expect(authProvider.isAuthenticated, isTrue);
   });
 }

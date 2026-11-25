@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import 'owner_dashboard_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   final AuthProvider? authProvider;
@@ -59,7 +60,11 @@ class _AuthScreenState extends State<AuthScreen>
     if (!mounted) return;
     if (authProvider.errorMessage != null) return;
     if (authProvider.isAuthenticated) {
-      Navigator.of(context).pop(true);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => OwnerDashboardScreen(authProvider: authProvider),
+        ),
+      );
     } else if (!_isLogin) {
       setState(() {
         _statusMessage =
