@@ -121,13 +121,13 @@ class KosCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: isAvailable
-                          ? Colors.green.shade50
-                          : Colors.red.shade50,
+                          ? Colors.green.shade800
+                          : Colors.red.shade800,
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
                         color: isAvailable
-                            ? Colors.green.shade400
-                            : Colors.red.shade400,
+                            ? Colors.green.shade800
+                            : Colors.red.shade800,
                       ),
                     ),
                     child: Row(
@@ -138,9 +138,7 @@ class KosCard extends StatelessWidget {
                               ? Icons.check_circle_outline
                               : Icons.cancel_outlined,
                           size: 14,
-                          color: isAvailable
-                              ? Colors.green.shade700
-                              : Colors.red.shade700,
+                          color: Colors.white,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -150,9 +148,7 @@ class KosCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: isAvailable
-                                ? Colors.green.shade800
-                                : Colors.red.shade800,
+                            color: Colors.white,
                           ),
                         ),
                       ],

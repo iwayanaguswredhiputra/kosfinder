@@ -140,27 +140,35 @@ class KosDetailScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: isAvailable ? Colors.green.shade50 : Colors.red.shade50,
+                        color: isAvailable
+                            ? Colors.green.shade800
+                            : Colors.red.shade800,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isAvailable ? Colors.green.shade400 : Colors.red.shade400,
+                          color: isAvailable
+                              ? Colors.green.shade800
+                              : Colors.red.shade800,
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            isAvailable ? Icons.check_circle_outline : Icons.cancel_outlined,
+                            isAvailable
+                                ? Icons.check_circle_outline
+                                : Icons.cancel_outlined,
                             size: 16,
-                            color: isAvailable ? Colors.green.shade700 : Colors.red.shade700,
+                            color: Colors.white,
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            isAvailable ? 'Sisa ${kos.roomsAvailable} Kamar' : 'Penuh',
+                            isAvailable
+                                ? 'Sisa ${kos.roomsAvailable} Kamar'
+                                : 'Penuh',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
-                              color: isAvailable ? Colors.green.shade800 : Colors.red.shade800,
+                              color: Colors.white,
                             ),
                           ),
                         ],

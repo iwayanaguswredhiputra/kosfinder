@@ -46,6 +46,19 @@ void main() {
       expect(find.text('Srengseng Sawah, Jagakarsa'), findsOneWidget);
       expect(find.text('Rp 1.100.000 / bulan'), findsOneWidget);
       expect(find.text('Sisa 2 Kamar'), findsOneWidget);
+      final badge = tester.widget<Container>(
+        find
+            .ancestor(
+              of: find.text('Sisa 2 Kamar'),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      expect((badge.decoration! as BoxDecoration).color, Colors.green.shade800);
+      expect(
+        tester.widget<Text>(find.text('Sisa 2 Kamar')).style?.color,
+        Colors.white,
+      );
 
       // Verifikasi fasilitas
       expect(find.text('Wi-Fi'), findsOneWidget);
@@ -68,6 +81,16 @@ void main() {
       expect(find.text('Kos Bintang Timur'), findsOneWidget);
       expect(find.text('Penuh'), findsOneWidget);
       expect(find.text('Sisa 0 Kamar'), findsNothing);
+      final badge = tester.widget<Container>(
+        find
+            .ancestor(of: find.text('Penuh'), matching: find.byType(Container))
+            .first,
+      );
+      expect((badge.decoration! as BoxDecoration).color, Colors.red.shade800);
+      expect(
+        tester.widget<Text>(find.text('Penuh')).style?.color,
+        Colors.white,
+      );
     });
 
     testWidgets('Tapping Salin Nomor copies WhatsApp number to clipboard and shows SnackBar (US03-AC2)', (tester) async {

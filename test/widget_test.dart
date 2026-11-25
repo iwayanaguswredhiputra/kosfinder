@@ -35,6 +35,19 @@ void main() {
       expect(find.text('Putri'), findsOneWidget);
       expect(find.text('Rp 900.000 / bulan'), findsOneWidget);
       expect(find.text('Sisa 3 Kamar'), findsOneWidget);
+      final badge = tester.widget<Container>(
+        find
+            .ancestor(
+              of: find.text('Sisa 3 Kamar'),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      expect((badge.decoration! as BoxDecoration).color, Colors.green.shade800);
+      expect(
+        tester.widget<Text>(find.text('Sisa 3 Kamar')).style?.color,
+        Colors.white,
+      );
     });
 
     testWidgets('KosCard displays Penuh badge when rooms_available is 0', (tester) async {
@@ -61,6 +74,16 @@ void main() {
 
       expect(find.text('Kos Penuh Damai'), findsOneWidget);
       expect(find.text('Penuh'), findsOneWidget);
+      final badge = tester.widget<Container>(
+        find
+            .ancestor(of: find.text('Penuh'), matching: find.byType(Container))
+            .first,
+      );
+      expect((badge.decoration! as BoxDecoration).color, Colors.red.shade800);
+      expect(
+        tester.widget<Text>(find.text('Penuh')).style?.color,
+        Colors.white,
+      );
     });
 
     testWidgets('KosListScreen displays error message and Coba Lagi button on network failure', (tester) async {

@@ -59,5 +59,5 @@ Setiap slice menghasilkan aplikasi yang dapat dijalankan (*runnable*).
 
 | ID | Tujuan | Story & AC Terkait | File yang Boleh Diubah | Cara Menguji | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T17 | Implementasi badge ketersediaan kamar kontras tegas (Tersedia vs Penuh) di kartu dan detail kos | US03-AC1, NFR-USE-2 | `lib/widgets/kos_card.dart`, `lib/screens/kos_detail_screen.dart` | `flutter run`, pastikan badge hijau untuk kamar > 0 dan merah "Penuh" untuk kamar = 0 | Pending |
+| T17 | Implementasi badge ketersediaan kamar kontras tegas (Tersedia vs Penuh) di kartu dan detail kos | US03-AC1, NFR-USE-2 | `lib/widgets/kos_card.dart`, `lib/screens/kos_detail_screen.dart` | Widget test kartu dan detail memverifikasi badge hijau/merah berkontras; `flutter analyze`, `flutter test` | Selesai |
 | T18 | Implementasi kontrol cepat pengubahan sisa kamar langsung dari OwnerDashboardScreen | US06-AC1 | `lib/screens/owner_dashboard_screen.dart`, `lib/providers/kos_provider.dart` | `flutter run`, kurangi kamar hingga 0 di dashboard dan verifikasi status langsung jadi Penuh | Pending |
