@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../providers/auth_provider.dart';
 import '../providers/kos_provider.dart';
 import '../widgets/kos_card.dart';
 import '../widgets/filter_modal.dart';
 import 'about_screen.dart';
+import 'auth_screen.dart';
 import 'kos_detail_screen.dart';
 
 class KosListScreen extends StatefulWidget {
@@ -62,6 +65,21 @@ class _KosListScreenState extends State<KosListScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const AboutScreen()),
+              );
+            },
+          ),
+          IconButton(
+            key: const Key('ownerAccountButton'),
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Akun Pemilik',
+            onPressed: () {
+              Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AuthScreen(
+                    authProvider: _providerFromContextOrNull(context),
+                  ),
+                ),
               );
             },
           ),
@@ -285,5 +303,13 @@ class _KosListScreenState extends State<KosListScreen> {
         ],
       ),
     );
+  }
+}
+
+AuthProvider? _providerFromContextOrNull(BuildContext context) {
+  try {
+    return context.read<AuthProvider>();
+  } on ProviderNotFoundException {
+    return null;
   }
 }
