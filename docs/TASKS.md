@@ -11,7 +11,7 @@ Setiap slice menghasilkan aplikasi yang dapat dijalankan (*runnable*).
 
 | ID | Tujuan | Story & AC Terkait | File yang Boleh Diubah | Cara Menguji | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T01 | Konfigurasi dependensi provider & supabase_flutter serta buat data model KosModel | US01-AC1 | `pubspec.yaml`, `lib/models/kos_model.dart` | `flutter test test/models/kos_model_test.dart` & `flutter analyze` | Pending |
+| T01 | Konfigurasi dependensi provider & supabase_flutter serta buat data model KosModel | US01-AC1 | `pubspec.yaml`, `lib/models/kos_model.dart` | `flutter test test/models/kos_model_test.dart` & `flutter analyze` | Selesai |
 | T02 | Implementasi KosRepository untuk mengambil daftar kos dari Supabase dan menangani error koneksi | US01-AC1, US01-AC4 | `lib/repositories/kos_repository.dart` | `flutter test test/repositories/kos_repository_test.dart` & `flutter analyze` | Pending |
 | T03 | Implementasi KosProvider untuk mengelola state data kos, loading, dan pesan kesalahan | US01-AC1, US01-AC4 | `lib/providers/kos_provider.dart` | `flutter test test/providers/kos_provider_test.dart` & `flutter analyze` | Pending |
 | T04 | Implementasi KosListScreen untuk menampilkan daftar kartu kos dan tombol coba lagi saat gagal muat | US01-AC1, US01-AC4 | `lib/screens/kos_list_screen.dart`, `lib/widgets/kos_card.dart`, `lib/main.dart` | `flutter run` verifikasi kartu kos tampil di layar dan tombol coba lagi berfungsi | Pending |
