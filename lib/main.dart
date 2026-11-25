@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'providers/auth_provider.dart';
 import 'providers/kos_provider.dart';
 import 'screens/kos_list_screen.dart';
 
@@ -9,6 +11,7 @@ void main() async {
 
   const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
   const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  AuthProvider? authProvider;
 
   if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
     await Supabase.initialize(
@@ -16,15 +19,17 @@ void main() async {
       // ignore: deprecated_member_use
       anonKey: supabaseAnonKey,
     );
+    authProvider = AuthProvider();
   }
 
-  runApp(const MyApp());
+  runApp(MyApp(authProvider: authProvider));
 }
 
 class MyApp extends StatelessWidget {
   final KosProvider? kosProvider;
+  final AuthProvider? authProvider;
 
-  const MyApp({super.key, this.kosProvider});
+  const MyApp({super.key, this.kosProvider, this.authProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +38,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => kosProvider ?? KosProvider(),
         ),
+        if (authProvider != null)
+          ChangeNotifierProvider<AuthProvider>.value(value: authProvider!),
       ],
       child: MaterialApp(
         title: 'KosFinder',
