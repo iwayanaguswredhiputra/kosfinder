@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 import 'package:kosfinder/providers/auth_provider.dart';
+import 'package:kosfinder/providers/kos_provider.dart';
 import 'package:kosfinder/repositories/auth_repository.dart';
+import 'package:kosfinder/repositories/kos_repository.dart';
 import 'package:kosfinder/screens/auth_screen.dart';
 import 'package:kosfinder/screens/owner_dashboard_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -48,20 +51,28 @@ Session _testSession() {
 void main() {
   late _FakeAuthRepository repository;
   late AuthProvider authProvider;
+  late KosProvider kosProvider;
 
   setUp(() {
     repository = _FakeAuthRepository();
     authProvider = AuthProvider(repository: repository);
+    kosProvider = KosProvider(
+      repository: KosRepository(customFetcher: () async => []),
+    );
   });
 
   tearDown(() async {
     authProvider.dispose();
+    kosProvider.dispose();
     await repository.authChanges.close();
   });
 
   Future<void> pumpAuthScreen(WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: AuthScreen(authProvider: authProvider)),
+      ChangeNotifierProvider<KosProvider>.value(
+        value: kosProvider,
+        child: MaterialApp(home: AuthScreen(authProvider: authProvider)),
+      ),
     );
   }
 
@@ -138,16 +149,19 @@ void main() {
     repository.signInHandler = (_, _) async =>
         AuthResponse(session: session, user: session.user);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: TextButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => AuthScreen(authProvider: authProvider),
+      ChangeNotifierProvider<KosProvider>.value(
+        value: kosProvider,
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => AuthScreen(authProvider: authProvider),
+                  ),
                 ),
+                child: const Text('Beranda'),
               ),
-              child: const Text('Beranda'),
             ),
           ),
         ),
@@ -170,16 +184,19 @@ void main() {
     repository.signUpHandler = (_, _) async =>
         AuthResponse(session: session, user: session.user);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: TextButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => AuthScreen(authProvider: authProvider),
+      ChangeNotifierProvider<KosProvider>.value(
+        value: kosProvider,
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => AuthScreen(authProvider: authProvider),
+                  ),
                 ),
+                child: const Text('Beranda'),
               ),
-              child: const Text('Beranda'),
             ),
           ),
         ),
