@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/kos_model.dart';
 
@@ -37,7 +38,8 @@ class KosRepository {
           .toList();
     } on KosRepositoryException {
       rethrow;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('SUPABASE_ERROR: $e');
       throw const KosRepositoryException('Gagal memuat data, periksa koneksi Anda');
     }
   }
