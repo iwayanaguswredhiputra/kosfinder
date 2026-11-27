@@ -75,7 +75,7 @@
 
 ## 5. User Stories & Acceptance Criteria
 
-### US01: Menjelajah dan Mencari Kos
+### US01: Menjelajah dan Mencari Kos (dari I-01)
 > Sebagai **Pencari Kos**, saya ingin **melihat dan mencari daftar kos berdasarkan teks area**, agar **saya dapat menemukan kos di lokasi yang saya inginkan**.
 
 - **US01-AC1: Menampilkan daftar kos tersedia**
@@ -97,7 +97,7 @@
 
 ---
 
-### US02: Menyaring Kos
+### US02: Menyaring Kos (dari I-02, I-03)
 > Sebagai **Pencari Kos**, saya ingin **menyaring kos berdasarkan rentang harga, tipe kos, dan fasilitas checklist**, agar **saya memperoleh hasil yang sesuai anggaran dan preferensi saya**.
 
 - **US02-AC1: Hasil filter sesuai kriteria checklist dan harga**
@@ -111,7 +111,7 @@
 
 ---
 
-### US03: Melihat Detail Kos & Menyalin Kontak
+### US03: Melihat Detail Kos & Menyalin Kontak (dari I-04, I-05)
 > Sebagai **Pencari Kos**, saya ingin **melihat detail spesifikasi kos dan menyalin nomor WhatsApp pemilik**, agar **saya dapat menghubungi pemilik kos secara mandiri**.
 
 - **US03-AC1: Detail kos dan indikator kamar penuh**
@@ -125,7 +125,7 @@
 
 ---
 
-### US04: Registrasi, Login, & Logout Pemilik Kos
+### US04: Registrasi, Login, & Logout Pemilik Kos [asumsi]
 > Sebagai **Pemilik Kos**, saya ingin **mendaftar, masuk, dan keluar dari akun saya menggunakan email dan password**, agar **saya dapat mengelola properti kos saya dengan aman**.
 
 - **US04-AC1: Registrasi dan login berhasil**
@@ -147,7 +147,7 @@
 
 ---
 
-### US05: Menambah Listing Kos Baru
+### US05: Menambah Listing Kos Baru [asumsi]
 > Sebagai **Pemilik Kos**, saya ingin **menambahkan data listing kos baru dengan checklist fasilitas**, agar **kos saya dapat dilihat oleh pencari kos**.
 
 - **US05-AC1: Penambahan listing berhasil**
@@ -161,7 +161,7 @@
 
 ---
 
-### US06: Mengelola Listing Kos Sendiri (Ubah & Hapus)
+### US06: Mengelola Listing Kos Sendiri (Ubah & Hapus) (dari I-06)
 > Sebagai **Pemilik Kos**, saya ingin **mengubah data dan menghapus listing kos milik saya**, agar **informasi kos saya selalu akurat atau dapat dihentikan saat tidak disewakan lagi**.
 
 - **US06-AC1: Pemilik mengubah data listing miliknya**
