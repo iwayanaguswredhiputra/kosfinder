@@ -108,6 +108,7 @@
   - **Given** pencari kos menerapkan kombinasi filter yang sangat spesifik.
   - **When** tidak ada data yang memenuhi seluruh kriteria tersebut.
   - **Then** sistem menampilkan pesan "Tidak ada kos yang cocok dengan kriteria filter Anda" dan opsi "Reset Filter".
+  - **US02-AC3:** *Given* filter aktif diterapkan, *When* daftar kos tampil, *Then* aplikasi menampilkan jumlah total kos yang sesuai dengan hasil penyaringan.
 
 ---
 

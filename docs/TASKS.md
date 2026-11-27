@@ -28,6 +28,7 @@ Setiap slice menghasilkan aplikasi yang dapat dijalankan (*runnable*).
 | T07 | Implementasi logika filter dan pencarian area case-insensitive pada KosProvider | US01-AC2, US02-AC1 | `lib/providers/kos_provider.dart` | `flutter test test/providers/kos_search_filter_test.dart` & `flutter analyze` | Selesai |
 | T08 | Implementasi kolom search bar area dan tampilan status kosong jika tidak ditemukan di KosListScreen | US01-AC2, US01-AC3 | `lib/screens/kos_list_screen.dart` | `flutter run`, ketik area di kolom pencarian dan verifikasi tampilan hasil / pesan kosong | Selesai |
 | T09 | Implementasi modal filter (tipe kos, slider/input harga maksimal, checklist fasilitas) dan reset filter | US02-AC1, US02-AC2 | `lib/widgets/filter_modal.dart`, `lib/screens/kos_list_screen.dart` | `flutter run`, terapkan filter spesifik dan verifikasi hasil filter serta fungsi reset | Selesai |
+| T19 | Implementasi indikator jumlah total kos hasil penyaringan pada bar filter aktif di KosListScreen | US02-AC3 | `lib/screens/kos_list_screen.dart`, `test/screens/kos_list_screen_test.dart` | `flutter test test/screens/kos_list_screen_test.dart` (pengujian US02-AC3) & `flutter run` verifikasi jumlah hasil filter | Pending |
 
 ---
 

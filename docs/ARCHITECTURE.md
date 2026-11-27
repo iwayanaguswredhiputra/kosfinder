@@ -25,7 +25,7 @@ Aplikasi menerapkan pola arsitektur berlapis: **Screen $\rightarrow$ Provider $\
 
 Navigasi menggunakan `Navigator` bawaan Flutter (declarative/named route sederhana tanpa package tambahan):
 
-1. **`KosListScreen`** (US01, US02): Beranda pencari kos dengan kolom pencarian area, tombol filter (bottom sheet/dialog), dan daftar kartu kos.
+1. **`KosListScreen`** (US01, US02): Beranda pencari kos dengan kolom pencarian area, tombol filter (bottom sheet/dialog), indikator jumlah total kos yang sesuai saat filter aktif (US02-AC3), dan daftar kartu kos.
 2. **`KosDetailScreen`** (US03): Menampilkan spesifikasi kos, fasilitas, status kamar (Tersedia/Penuh), dan tombol salin nomor WhatsApp ke *clipboard* (menggunakan `Clipboard` dari `flutter/services.dart`).
 3. **`AuthScreen`** (US04): Tab login & registrasi email/password untuk pemilik kos.
 4. **`OwnerDashboardScreen`** (US04, US06): Menampilkan daftar listing milik akun terautentikasi dan opsi kelola (ubah, hapus, logout).
