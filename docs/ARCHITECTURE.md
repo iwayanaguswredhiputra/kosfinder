@@ -112,3 +112,23 @@ Mempertahankan kesederhanaan (*Keep It Simple*) dengan hanya menggunakan 2 depen
 | **`supabase_flutter`** | SDK resmi Supabase untuk autentikasi pemilik kos (email/password) dan operasi CRUD database dengan proteksi RLS. | US01 - US06 |
 
 *Catatan: Fitur salin kontak (US03) tidak membutuhkan package tambahan, cukup menggunakan `Clipboard` bawaan Flutter SDK (`flutter/services.dart`).*
+
+---
+
+## 7. Keputusan
+
+### K1: Otorisasi Data melalui Row Level Security (RLS) Supabase
+- **Alasan:** Penegakan hak akses langsung di level database menjamin keamanan data terpusat dan mencegah manipulasi tidak sah dari sisi klien.
+- **Konsekuensi:** Aturan akses untuk operasi INSERT, UPDATE, dan DELETE wajib dikonfigurasi melalui kebijakan RLS di Supabase, serta pengujian mutasi data memerlukan sesi autentikasi pengguna yang valid.
+
+### K2: State Management Menggunakan Provider
+- **Alasan:** Provider merupakan solusi manajemen state yang sederhana, efisien untuk skala MVP, serta memisahkan logika bisnis dari antarmuka tanpa boilerplate berlebih.
+- **Konsekuensi:** Pembaruan UI bergantung pada `ChangeNotifier` dan struktur widget tree yang perlu ditata dengan cermat agar menghindari rebuild yang tidak diperlukan.
+
+### K3: Penyaringan Data di Sisi Klien Setelah Pengambilan Daftar Kos
+- **Alasan:** Volume data pada tahap MVP relatif kecil sehingga pemfilteran di sisi klien memberikan respons pencarian instan tanpa perlu melakukan kueri berulang ke server.
+- **Konsekuensi:** Seluruh data kos publik dimuat ke memori perangkat di awal, dan mekanisme ini harus dimigrasikan ke kueri server atau paginasi jika volume data meningkat secara signifikan.
+
+### K4: Konfigurasi Kredensial melalui `--dart-define`
+- **Alasan:** Pendekatan ini mencegah kebocoran kredensial sensitif di repositori kode sumber sesuai prinsip *no hardcoded secrets* dengan menyuntikkan nilai saat proses kompilasi.
+- **Konsekuensi:** Perintah *run*, *test*, dan *build* wajib menyertakan parameter `--dart-define` yang sesuai agar aplikasi dapat menginisialisasi koneksi ke Supabase.
