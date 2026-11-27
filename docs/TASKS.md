@@ -38,8 +38,8 @@ Setiap slice menghasilkan aplikasi yang dapat dijalankan (*runnable*).
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | T10 | Implementasi AuthRepository untuk register, login, logout, dan memantau sesi auth Supabase | US04-AC1, US04-AC4 | `lib/repositories/auth_repository.dart` | `flutter test test/repositories/auth_repository_test.dart` & `flutter analyze` | Selesai |
 | T11 | Implementasi AuthProvider untuk mengelola status autentikasi dan integrasikan di main.dart | US04-AC1, US04-AC2, US04-AC3, US04-AC4 | `lib/providers/auth_provider.dart`, `lib/main.dart` | `flutter test test/providers/auth_provider_test.dart` & `flutter analyze` | Selesai |
-| T12 | Implementasi AuthScreen (tab Login dan Registrasi) dengan validasi form dan pesan error | US04-AC1, US04-AC2, US04-AC3 | `lib/screens/auth_screen.dart`, `lib/screens/kos_list_screen.dart`, `test/screens/auth_screen_test.dart` | `flutter test test/screens/auth_screen_test.dart` & `flutter analyze` | Selesai |
-| T13 | Implementasi kerangka OwnerDashboardScreen dengan tombol logout dan pesan jika belum ada listing | US04-AC4, US06-AC4 | `lib/screens/owner_dashboard_screen.dart`, `lib/screens/auth_screen.dart` | `flutter test test/screens/auth_screen_test.dart test/screens/owner_dashboard_screen_test.dart`, `flutter analyze` | Selesai |
+| T12 | Implementasi AuthScreen (tab Login dan Registrasi) dengan validasi form dan pesan error | US04-AC1, US04-AC2, US04-AC3 | `lib/screens/auth_screen.dart`, `lib/screens/kos_list_screen.dart` | `flutter run`, uji login dengan kredensial salah dan benar serta cek pesan validasi | Selesai |
+| T13 | Implementasi kerangka OwnerDashboardScreen dengan tombol logout dan pesan jika belum ada listing | US04-AC4, US06-AC4 | `lib/screens/owner_dashboard_screen.dart`, `lib/screens/auth_screen.dart` | `flutter run`, login ke dashboard lalu tap logout dan pastikan kembali ke halaman utama | Selesai |
 
 ---
 
@@ -49,8 +49,8 @@ Setiap slice menghasilkan aplikasi yang dapat dijalankan (*runnable*).
 | ID | Tujuan | Story & AC Terkait | File yang Boleh Diubah | Cara Menguji | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | T14 | Implementasi method tambah, ubah, dan hapus kos pada KosRepository & KosProvider | US05-AC1, US06-AC1, US06-AC2, US06-AC3 | `lib/repositories/kos_repository.dart`, `lib/providers/kos_provider.dart` | `flutter test test/repositories/kos_crud_test.dart` & `flutter analyze` | Selesai |
-| T15 | Implementasi KosFormScreen untuk tambah listing kos baru dengan validasi dan checklist fasilitas | US05-AC1, US05-AC2 | `lib/screens/kos_form_screen.dart`, `lib/screens/owner_dashboard_screen.dart` | `flutter test test/screens/kos_form_screen_test.dart test/screens/owner_dashboard_screen_test.dart`, `flutter analyze`, `flutter test` | Selesai |
-| T16 | Implementasi mode edit pada KosFormScreen dan dialog konfirmasi hapus di OwnerDashboardScreen | US06-AC1, US06-AC2 | `lib/screens/owner_dashboard_screen.dart`, `lib/screens/kos_form_screen.dart` | `flutter test test/screens/kos_form_screen_test.dart test/screens/owner_dashboard_screen_test.dart`, `flutter analyze`, `flutter test` | Selesai |
+| T15 | Implementasi KosFormScreen untuk tambah listing kos baru dengan validasi dan checklist fasilitas | US05-AC1, US05-AC2 | `lib/screens/kos_form_screen.dart`, `lib/screens/owner_dashboard_screen.dart` | `flutter run`, submit form tambah kos dan verifikasi listing baru muncul di dashboard & publik | Selesai |
+| T16 | Implementasi mode edit pada KosFormScreen dan dialog konfirmasi hapus di OwnerDashboardScreen | US06-AC1, US06-AC2 | `lib/screens/owner_dashboard_screen.dart`, `lib/screens/kos_form_screen.dart` | `flutter run`, edit data kos dan hapus kos lalu periksa perubahan data secara realtime | Selesai |
 
 ---
 
@@ -59,5 +59,5 @@ Setiap slice menghasilkan aplikasi yang dapat dijalankan (*runnable*).
 
 | ID | Tujuan | Story & AC Terkait | File yang Boleh Diubah | Cara Menguji | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T17 | Implementasi badge ketersediaan kamar kontras tegas (Tersedia vs Penuh) di kartu dan detail kos | US03-AC1, NFR-USE-2 | `lib/widgets/kos_card.dart`, `lib/screens/kos_detail_screen.dart` | Widget test kartu dan detail memverifikasi badge hijau/merah berkontras; `flutter analyze`, `flutter test` | Selesai |
-| T18 | Implementasi kontrol cepat pengubahan sisa kamar langsung dari halaman Ubah Kos | US06-AC1 | `lib/screens/kos_form_screen.dart`, `lib/screens/owner_dashboard_screen.dart` | Widget test kontrol tambah/kurangi di halaman Ubah Kos, batas minimum 0, dan status Penuh setelah disimpan; dashboard hanya menampilkan Ubah/Hapus; `flutter analyze`, `flutter test` | Selesai |
+| T17 | Implementasi badge ketersediaan kamar kontras tegas (Tersedia vs Penuh) di kartu dan detail kos | US03-AC1, NFR-USE-2 | `lib/widgets/kos_card.dart`, `lib/screens/kos_detail_screen.dart` | `flutter run`, pastikan badge hijau untuk kamar > 0 dan merah "Penuh" untuk kamar = 0 | Selesai |
+| T18 | Implementasi kontrol cepat pengubahan sisa kamar langsung dari OwnerDashboardScreen | US06-AC1 | `lib/screens/owner_dashboard_screen.dart`, `lib/providers/kos_provider.dart` | `flutter run`, kurangi kamar hingga 0 di dashboard dan verifikasi status langsung jadi Penuh | Selesai |
